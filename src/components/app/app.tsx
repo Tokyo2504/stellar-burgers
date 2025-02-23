@@ -11,32 +11,33 @@ import {
 } from '@pages';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { useEffect } from 'react';
-import { useDispatch } from '../../services/store';
+import { useDispatch, useSelector } from '../../services/store';
 import { fetchIngredientsThunk } from '../../services/slices/ingredients/slice';
 import { fetchUserThunk } from '../../services/slices/user/slice';
 import { AppHeader, IngredientDetails, Modal, OrderInfo } from '@components';
 import '../../index.css';
 import styles from './app.module.css';
 import { ProtectedRoute } from '../protected-route';
-import { getCookie } from '../../utils/cookie';
+import { isLoadingOrderSelector } from '../../services/slices/feed/slice';
 
 const App = () => {
   const location = useLocation();
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const background = location.state?.background;
+  const match = location.pathname.match(/\d+/);
+  const orderNumber = match ? `#${match[0].padStart(6, '0')}` : null;
+  const isLoadingOrder = useSelector(isLoadingOrderSelector);
 
   useEffect(() => {
-    if (getCookie('accessToken')) {
-      dispatch(fetchUserThunk());
-    }
+    dispatch(fetchUserThunk());
     dispatch(fetchIngredientsThunk());
   }, [dispatch]);
 
   return (
     <div className={styles.app}>
       <AppHeader />
-      <Routes location={background}>
+      <Routes location={background || location}>
         <Route path='/' element={<ConstructorPage />} />
         <Route path='*' element={<NotFound404 />} />
         <Route path='/ingredients/:id' element={<IngredientDetails />} />
@@ -104,8 +105,14 @@ const App = () => {
           <Route
             path='/feed/:number'
             element={
-              <Modal title={'Информация о заказе'} onClose={() => navigate(-1)}>
-                <OrderInfo />
+              <Modal
+                title={isLoadingOrder ? 'Загрузка...' : String(orderNumber)}
+                titleClassName={
+                  !isLoadingOrder ? 'text text_type_digits-default' : ''
+                }
+                onClose={() => navigate(-1)}
+              >
+                <OrderInfo isModal />
               </Modal>
             }
           />
@@ -113,15 +120,21 @@ const App = () => {
             path='/ingredients/:id'
             element={
               <Modal title={'Детали ингредиента'} onClose={() => navigate(-1)}>
-                <IngredientDetails />
+                <IngredientDetails isModal />
               </Modal>
             }
           />
           <Route
             path='/profile/orders/:number'
             element={
-              <Modal title={'Информация о заказе'} onClose={() => navigate(-1)}>
-                <OrderInfo />
+              <Modal
+                title={isLoadingOrder ? 'Загрузка...' : String(orderNumber)}
+                titleClassName={
+                  !isLoadingOrder ? 'text text_type_digits-default' : ''
+                }
+                onClose={() => navigate(-1)}
+              >
+                <OrderInfo isModal />
               </Modal>
             }
           />

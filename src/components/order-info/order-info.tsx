@@ -5,21 +5,23 @@ import { TIngredient } from '@utils-types';
 import { useDispatch, useSelector } from '../../services/store';
 import {
   fetchOrderByNumberThunk,
-  orderSelector
+  orderSelector,
+  isLoadingOrderSelector
 } from '../../services/slices/feed/slice';
 import { ingredientsSelector } from '../../services/slices/ingredients/slice';
 import { useParams } from 'react-router-dom';
 
-export const OrderInfo: FC = () => {
+export const OrderInfo: FC<{ isModal?: boolean }> = ({ isModal = false }) => {
   /** TODO: взять переменные orderData и ingredients из стора */
   const ingredients: TIngredient[] = useSelector(ingredientsSelector);
   const orderData = useSelector(orderSelector);
+  const isLoading = useSelector(isLoadingOrderSelector);
   const { number } = useParams();
   const dispatch = useDispatch();
 
   useEffect(() => {
     dispatch(fetchOrderByNumberThunk(Number(number)));
-  }, []);
+  }, [number]);
 
   /* Готовим данные для отображения */
   const orderInfo = useMemo(() => {
@@ -63,9 +65,9 @@ export const OrderInfo: FC = () => {
     };
   }, [orderData, ingredients]);
 
-  if (!orderInfo) {
+  if (isLoading || !orderInfo) {
     return <Preloader />;
   }
 
-  return <OrderInfoUI orderInfo={orderInfo} />;
+  return <OrderInfoUI orderInfo={orderInfo} isModal={isModal} />;
 };

@@ -2,8 +2,8 @@ import { useSelector } from '../../services/store';
 import { Navigate, useLocation } from 'react-router';
 import { Preloader } from '@ui';
 import {
-  isAuthSelector,
-  loginRequestSelector
+  isAuthCheckedSelector,
+  isAuthSelector
 } from '../../services/slices/user/slice';
 
 type ProtectedRouteProps = {
@@ -12,24 +12,23 @@ type ProtectedRouteProps = {
 };
 
 export const ProtectedRoute = ({
-  onlyUnAuth,
+  onlyUnAuth = false,
   children
 }: ProtectedRouteProps) => {
   const location = useLocation();
-  const isAuthCheked = useSelector(isAuthSelector);
-  const loginRequest = useSelector(loginRequestSelector);
+  const isAuthChecked = useSelector(isAuthCheckedSelector);
+  const isAuth = useSelector(isAuthSelector);
 
-  if (!isAuthCheked && loginRequest) {
+  if (!isAuthChecked) {
     return <Preloader />;
   }
 
-  if (!onlyUnAuth && !isAuthCheked) {
+  if (!onlyUnAuth && !isAuth) {
     return <Navigate replace to='/login' state={{ from: location }} />;
   }
 
-  if (onlyUnAuth && isAuthCheked) {
-    const redirectPath = location.state?.from;
-    return <Navigate replace to={redirectPath} state={location} />;
+  if (onlyUnAuth && isAuth) {
+    return <Navigate replace to={location.state?.from || '/'} />;
   }
 
   return children;

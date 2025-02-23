@@ -56,6 +56,7 @@ export const fetchOrderThunk = createAsyncThunk(
 export type TUserState = {
   user: TUser | null;
   isAuth: boolean;
+  isAuthChecked: boolean;
   orders: TOrder[];
   orderRequest: boolean;
   loginRequest: boolean;
@@ -65,6 +66,7 @@ export type TUserState = {
 const initialState: TUserState = {
   user: null,
   isAuth: false,
+  isAuthChecked: false,
   orders: [],
   orderRequest: false,
   loginRequest: false,
@@ -78,6 +80,7 @@ const userSlice = createSlice({
     userSelector: (state) => state.user,
     nameSelector: (state) => state.user?.name || '',
     emailSelector: (state) => state.user?.email || '',
+    isAuthCheckedSelector: (state) => state.isAuthChecked,
     isAuthSelector: (state) => state.isAuth,
     loginRequestSelector: (state) => state.loginRequest,
     ordersSelector: (state) => state.orders,
@@ -121,9 +124,9 @@ const userSlice = createSlice({
         state.user = action.payload;
       })
       // Выход пользователя из профиля
-      .addCase(logoutUserThunk.pending, (state) => {
-        state.loginRequest = false;
+      .addCase(logoutUserThunk.fulfilled, (state) => {
         state.isAuth = false;
+        state.isAuthChecked = true;
         state.user = null;
       })
       // Обновление данных пользователя
@@ -131,26 +134,25 @@ const userSlice = createSlice({
         state.loginRequest = true;
       })
       .addCase(updateUserInfoThunk.rejected, (state, action) => {
-        state.loginRequest = false;
         state.error = action.error.message!;
       })
       .addCase(updateUserInfoThunk.fulfilled, (state, action) => {
-        state.loginRequest = false;
         state.isAuth = true;
         state.user = action.payload.user;
       })
       // Получение данных пользователя
       .addCase(fetchUserThunk.pending, (state) => {
-        state.loginRequest = true;
+        state.isAuthChecked = false;
       })
       .addCase(fetchUserThunk.rejected, (state, action) => {
-        state.loginRequest = false;
+        state.isAuth = false;
+        state.isAuthChecked = true;
         state.user = null;
         state.error = action.error.message!;
       })
       .addCase(fetchUserThunk.fulfilled, (state, action) => {
-        state.loginRequest = false;
         state.isAuth = true;
+        state.isAuthChecked = true;
         state.user = action.payload.user;
       })
       // Получение данных о заказах пользователя
@@ -173,10 +175,10 @@ export const {
   nameSelector,
   emailSelector,
   isAuthSelector,
-  loginRequestSelector,
   ordersSelector,
   ordersRequestSelector,
-  errorSelector
+  errorSelector,
+  isAuthCheckedSelector
 } = userSlice.selectors;
 export const { resetError } = userSlice.actions;
 export default userSlice.reducer;
