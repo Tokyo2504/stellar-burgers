@@ -42,3 +42,10 @@
   flex-direction: column;
   align-items: center;
 }
+
+.title {
+  font-family: 'JetBrains Mono';
+  font-weight: normal;
+  font-size: 28px;
+  line-height: .86;
+}

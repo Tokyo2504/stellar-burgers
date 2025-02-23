@@ -1,8 +1,21 @@
 .wrap {
+  display: grid;
+  place-items: center;
+  height: 100vh;
+}
+
+.wrap_modal {
+  height: 100%;
+}
+
+.content {
   margin: 0 auto;
   width: 640px;
 }
+
 .number {
+  display: block;
+  font-family: 'Iceland';
   text-align: center;
 }
 
@@ -71,6 +84,7 @@
   justify-content: flex-start;
   align-items: center;
 }
+
 .total {
   margin-left: auto;
 }

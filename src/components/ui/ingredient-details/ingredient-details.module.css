@@ -1,3 +1,13 @@
+.wrap {
+  display: grid;
+  place-items: center;
+  padding-top: 120px;
+}
+
+.wrap_modal {
+  padding-top: 0;
+}
+
 .content {
   margin: 0 60px;
   display: flex;
