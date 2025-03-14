@@ -32,6 +32,9 @@ describe('Интеграционные тесты для страницы кон
 
   describe('Добавление ингредиентов в конструктор', () => {
     it('Добавление булки', () => {
+      cy.get(elements.constructorBunTop).should('not.exist');
+      cy.get(elements.constructorBunBottom).should('not.exist');
+
       cy.get(elements.bun)
         .first()
         .within(() => {
@@ -43,6 +46,7 @@ describe('Интеграционные тесты для страницы кон
     });
 
     it('Добавление начинки', () => {
+      cy.get(elements.constructorMain).should('not.exist');
       cy.get(elements.main)
         .first()
         .within(() => {
@@ -52,6 +56,7 @@ describe('Интеграционные тесты для страницы кон
     });
 
     it('Добавление соуса', () => {
+      cy.get(elements.constructorSauce).should('not.exist');
       cy.get(elements.sauce)
         .first()
         .within(() => {
@@ -63,17 +68,49 @@ describe('Интеграционные тесты для страницы кон
 
   describe('Тестирование работы модальных окон', () => {
     it('Открытие модального окна ингредиента', () => {
-      cy.get(elements.bun).first().click();
-      cy.get(elements.modal).should('exist');
+      cy.fixture('ingredients.json').then((ingredient) => {
+        const bun = ingredient.data.find(
+          (ingredient) => ingredient.type === 'bun'
+        );
+
+        cy.get(elements.modal).should('not.exist');
+        cy.get(elements.bun).first().click();
+        cy.get(elements.modal).should('exist');
+        cy.get(elements.modal).within(() => {
+          cy.get('h3.text_type_main-medium').should('contain', bun.name);
+
+          const values = [
+            { label: 'Калории, ккал', value: bun.calories },
+            { label: 'Белки, г', value: bun.proteins },
+            { label: 'Жиры, г', value: bun.fat },
+            { label: 'Углеводы, г', value: bun.carbohydrates }
+          ];
+
+          values.forEach((nutrition, index) => {
+            cy.get('ul.text_type_main-default')
+              .find('li')
+              .eq(index)
+              .within(() => {
+                cy.get('p.text').should('contain', nutrition.label);
+                cy.get('p.text_type_digits-default').should(
+                  'contain',
+                  nutrition.value
+                );
+              });
+          });
+        });
+      });
     });
 
     it('Закрытие модального окна по крестику', () => {
+      cy.get(elements.modal).should('not.exist');
       cy.get(elements.bun).first().click();
       cy.get(elements.modalCloseButton).click();
       cy.get(elements.modal).should('not.exist');
     });
 
     it('Закрытие модального окна по оверлею', () => {
+      cy.get(elements.modal).should('not.exist');
       cy.get(elements.bun).first().click();
       cy.get(elements.modalOverlay).click({ force: true });
       cy.get(elements.modal).should('not.exist');
@@ -82,17 +119,26 @@ describe('Интеграционные тесты для страницы кон
 
   describe('Тестирование создания заказа', () => {
     it('Создание заказа', () => {
+      cy.get(elements.constructorBunTop).should('not.exist');
+      cy.get(elements.constructorBunBottom).should('not.exist');
+      cy.get(elements.constructorMain).should('not.exist');
+      cy.get(elements.orderButton).should('be.disabled');
+
       cy.get(elements.bun)
         .first()
         .within(() => {
           cy.get(elements.addButton).click();
         });
 
+      cy.get(elements.orderButton).should('be.disabled');
+
       cy.get(elements.main)
         .first()
         .within(() => {
           cy.get(elements.addButton).click();
         });
+
+      cy.get(elements.orderButton).should('not.be.disabled');
 
       cy.get(elements.sauce)
         .first()

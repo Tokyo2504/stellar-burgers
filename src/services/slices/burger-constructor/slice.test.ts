@@ -66,6 +66,20 @@ describe('Проверка редьюсера слайса burger-consctructor',
     expect(newState.burger.ingredients).toEqual([]);
   });
 
+  it('Проверка обработки удаления начинки из пустого конструктора', () => {
+    const initialState = {
+      burger: {
+        bun: null,
+        ingredients: []
+      },
+      error: null
+    };
+
+    const action = removeIngredient({ ...mockMain, id: '1' });
+    const newState = burgerConstructorReducer(initialState, action);
+    expect(newState.burger.ingredients).toEqual([]);
+  });
+
   it('Проверка перемещения начинки вверх', () => {
     const initialState = {
       burger: {
@@ -103,6 +117,46 @@ describe('Проверка редьюсера слайса burger-consctructor',
     expect(newState.burger.ingredients).toEqual([
       { ...mockMain, id: '2' },
       { ...mockMain, id: '1' }
+    ]);
+  });
+
+  it('Проверка перемещения начинки вверх с отрицательным индексом', () => {
+    const initialState = {
+      burger: {
+        bun: null,
+        ingredients: [
+          { ...mockMain, id: '1' },
+          { ...mockMain, id: '2' }
+        ]
+      },
+      error: null
+    };
+
+    const action = moveIngredientUp(-1);
+    const newState = burgerConstructorReducer(initialState, action);
+    expect(newState.burger.ingredients).toEqual([
+      { ...mockMain, id: '1' },
+      { ...mockMain, id: '2' }
+    ]);
+  });
+
+  it('Проверка перемещения начинки вверх с индексом больше длины массива', () => {
+    const initialState = {
+      burger: {
+        bun: null,
+        ingredients: [
+          { ...mockMain, id: '1' },
+          { ...mockMain, id: '2' }
+        ]
+      },
+      error: null
+    };
+
+    const action = moveIngredientUp(5);
+    const newState = burgerConstructorReducer(initialState, action);
+    expect(newState.burger.ingredients).toEqual([
+      { ...mockMain, id: '1' },
+      { ...mockMain, id: '2' }
     ]);
   });
 });
